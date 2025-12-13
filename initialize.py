@@ -109,33 +109,53 @@ def initialize_retriever():
     if "retriever" in st.session_state:
         return
     
-    # RAGの参照先となるデータソースの読み込み
-    docs_all = load_data_sources()
+    try:
+        st.info("🔄 データを読み込んでいます...")
+        # RAGの参照先となるデータソースの読み込み
+        docs_all = load_data_sources()
+        st.success(f"✓ {len(docs_all)}個のドキュメントを読み込みました")
 
-    # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
-    for doc in docs_all:
-        doc.page_content = adjust_string(doc.page_content)
-        for key in doc.metadata:
-            doc.metadata[key] = adjust_string(doc.metadata[key])
-    
-    # 埋め込みモデルの用意（Google Gemini）
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    
-    # チャンク分割用のオブジェクトを作成
-    text_splitter = CharacterTextSplitter(
-        chunk_size=ct.CHUNK_SIZE,
-        chunk_overlap=ct.CHUNK_OVERLAP,
-        separator="\n"
-    )
+        st.info("🔄 テキストを正規化しています...")
+        # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
+        for doc in docs_all:
+            doc.page_content = adjust_string(doc.page_content)
+            for key in doc.metadata:
+                doc.metadata[key] = adjust_string(doc.metadata[key])
+        st.success("✓ テキストの正規化が完了しました")
+        
+        st.info("🔄 埋め込みモデルを初期化しています...")
+        # 埋め込みモデルの用意（Google Gemini）
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        st.success("✓ 埋め込みモデルの初期化が完了しました")
+        
+        st.info("🔄 ドキュメントを分割しています...")
+        # チャンク分割用のオブジェクトを作成
+        text_splitter = CharacterTextSplitter(
+            chunk_size=ct.CHUNK_SIZE,
+            chunk_overlap=ct.CHUNK_OVERLAP,
+            separator="\n"
+        )
 
-    # チャンク分割を実施
-    splitted_docs = text_splitter.split_documents(docs_all)
+        # チャンク分割を実施
+        splitted_docs = text_splitter.split_documents(docs_all)
+        st.success(f"✓ {len(splitted_docs)}個のチャンクに分割しました")
 
-    # ベクターストアの作成
-    db = Chroma.from_documents(splitted_docs, embedding=embeddings)
+        st.info("🔄 ベクターストアを作成しています（これには数分かかる場合があります）...")
+        # ベクターストアの作成
+        db = Chroma.from_documents(splitted_docs, embedding=embeddings)
+        st.success("✓ ベクターストアの作成が完了しました")
 
-    # ベクターストアを検索するRetrieverの作成
-    st.session_state.retriever = db.as_retriever(search_kwargs={"k": ct.RETRIEVER_SEARCH_K})
+        # ベクターストアを検索するRetrieverの作成
+        st.session_state.retriever = db.as_retriever(search_kwargs={"k": ct.RETRIEVER_SEARCH_K})
+        st.success("✅ 初期化が正常に完了しました！")
+        
+    except Exception as e:
+        error_msg = f"初期化中にエラーが発生しました: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        st.error(f"❌ {error_msg}")
+        st.error("詳細なエラー情報:")
+        st.exception(e)
+        raise
 
 
 def initialize_session_state():
