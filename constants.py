@@ -63,7 +63,9 @@ SUPPORTED_EXTENSIONS = {
     ".txt": lambda path: TextLoader(path, encoding="utf-8"),
     ".md": lambda path: TextLoader(path, encoding="utf-8"),
     ".xlsx": None,  # Custom loader in initialize.py
-    ".xls": None  # Custom loader in initialize.py
+    ".xls": None,  # Custom loader in initialize.py
+    ".pptx": None,  # Custom loader in initialize.py
+    ".ppt": None  # Custom loader in initialize.py
 }
 WEB_URL_LOAD_TARGETS = [
     "https://generative-ai.web-camp.io/"

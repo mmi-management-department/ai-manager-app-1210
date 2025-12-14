@@ -316,6 +316,34 @@ def file_load(path, docs_all):
                 docs_all.append(doc)
             except Exception as e:
                 print(f"Warning: Failed to load Excel file {path}: {e}")
+        # PowerPointファイルの場合は特別な処理
+        elif file_extension in ['.pptx', '.ppt']:
+            try:
+                from pptx import Presentation
+                from langchain.docstore.document import Document
+                
+                # PowerPointファイルを読み込む
+                prs = Presentation(path)
+                
+                # テキストを抽出
+                text_content = []
+                for slide_num, slide in enumerate(prs.slides, 1):
+                    slide_text = f"\n--- Slide {slide_num} ---\n"
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            slide_text += shape.text + "\n"
+                    text_content.append(slide_text)
+                
+                content = "\n".join(text_content)
+                
+                # ドキュメントとして追加
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": path}
+                )
+                docs_all.append(doc)
+            except Exception as e:
+                print(f"Warning: Failed to load PowerPoint file {path}: {e}")
         else:
             # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
             loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
