@@ -296,10 +296,31 @@ def file_load(path, docs_all):
 
     # 想定していたファイル形式の場合のみ読み込む
     if file_extension in ct.SUPPORTED_EXTENSIONS:
-        # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
-        loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
-        docs = loader.load()
-        docs_all.extend(docs)
+        # Excelファイルの場合は特別な処理
+        if file_extension in ['.xlsx', '.xls']:
+            try:
+                import pandas as pd
+                from langchain.docstore.document import Document
+                
+                # Excelファイルを読み込む
+                df = pd.read_excel(path)
+                
+                # DataFrameを文字列に変換
+                content = df.to_string(index=False)
+                
+                # ドキュメントとして追加
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": path}
+                )
+                docs_all.append(doc)
+            except Exception as e:
+                print(f"Warning: Failed to load Excel file {path}: {e}")
+        else:
+            # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
+            loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
+            docs = loader.load()
+            docs_all.extend(docs)
 
 
 def adjust_string(s):
