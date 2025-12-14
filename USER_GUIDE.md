@@ -288,7 +288,7 @@ https://internal-ai-search-app.streamlit.app
 ### 質問・フィードバック
 
 - **社内チャット**: #ai-search-support
-- **メール**: ai-support@mm-international.co.jp
+- **お問い合わせ**: リアルの管理部長までキントーンでお問い合わせください
 - **担当部署**: 株式会社エムエムインターナショナル 情報システム部
 
 ### フィードバックをお願いします

@@ -279,7 +279,7 @@ def check_password() -> bool:
                 return False
     
     st.markdown("---")
-    st.caption("📧 パスワードがわからない場合は、管理者（ai-support@mm-international.co.jp）にお問い合わせください。")
+    st.caption("📧 パスワードがわからない場合は、リアルの管理部長までキントーンでお問い合わせください！")
     
     return False
 
