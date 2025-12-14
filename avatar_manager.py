@@ -338,14 +338,14 @@ def apply_avatar_styles():
 
 def show_welcome_screen():
     """
-    ウェルカムスクリーン（ロゴ + アバター）を表示
+    ウェルカムスクリーン（アバター）を表示
     """
-    # ロゴ表示
-    st.markdown('<div class="logo-hover">', unsafe_allow_html=True)
-    LogoManager.show_logo(width=250, use_column=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown("---")
+    # ロゴ表示は削除
+    # st.markdown('<div class="logo-hover">', unsafe_allow_html=True)
+    # LogoManager.show_logo(width=250, use_column=True)
+    # st.markdown('</div>', unsafe_allow_html=True)
+    # 
+    # st.markdown("---")
     
     # タイトル
     st.markdown(
