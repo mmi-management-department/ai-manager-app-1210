@@ -11,6 +11,7 @@ from logging.handlers import TimedRotatingFileHandler
 from uuid import uuid4
 import sys
 import unicodedata
+from datetime import datetime
 from dotenv import load_dotenv
 import streamlit as st
 from docx import Document
@@ -348,8 +349,6 @@ def file_load(path, docs_all):
         elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
             try:
                 from langchain.docstore.document import Document
-                import os
-                from datetime import datetime
                 
                 # ファイルのメタデータを取得
                 file_stat = os.stat(path)
@@ -382,8 +381,6 @@ def file_load(path, docs_all):
         elif file_extension in ['.mp4', '.avi', '.mov', '.wmv', '.mkv']:
             try:
                 from langchain.docstore.document import Document
-                import os
-                from datetime import datetime
                 
                 # ファイルのメタデータを取得
                 file_stat = os.stat(path)
