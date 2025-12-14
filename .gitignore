@@ -227,6 +227,10 @@ feedback/
 *.db
 *.sqlite
 
+# ベクターストアのsqliteファイルは除外しない（重要！）
+!vectorstore/*.sqlite3
+!vectorstore/**/*.sqlite3
+
 # バックアップファイル
 *.bak
 *.backup
