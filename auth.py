@@ -17,6 +17,10 @@ import json
 import datetime
 from typing import Optional
 from pathlib import Path
+try:
+    from streamlit.web.server.websocket_headers import _get_websocket_headers
+except ImportError:
+    _get_websocket_headers = None
 
 
 def hash_password(password: str) -> str:
@@ -29,6 +33,35 @@ def get_log_file_path() -> Path:
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
     return log_dir / "access_log.json"
+
+
+def get_client_ip() -> str:
+    """
+    クライアントのIPアドレスを取得
+    
+    Returns:
+        str: IPアドレス（取得できない場合は"unknown"）
+    """
+    try:
+        # Streamlit Cloudの場合、X-Forwarded-Forヘッダーから取得
+        if _get_websocket_headers:
+            headers = _get_websocket_headers()
+            if headers and "X-Forwarded-For" in headers:
+                # X-Forwarded-Forは複数のIPをカンマ区切りで含む可能性があるため、最初のIPを取得
+                ip = headers["X-Forwarded-For"].split(",")[0].strip()
+                return ip
+        
+        # 環境変数から取得を試みる
+        if "REMOTE_ADDR" in os.environ:
+            return os.environ["REMOTE_ADDR"]
+        
+        # セッションステートにキャッシュされている場合
+        if "client_ip" in st.session_state:
+            return st.session_state.client_ip
+        
+        return "unknown"
+    except Exception:
+        return "unknown"
 
 
 def log_access_attempt(success: bool, username: str = "user", ip_address: str = None):
@@ -70,12 +103,13 @@ def log_access_attempt(success: bool, username: str = "user", ip_address: str = 
         print(f"ログ記録エラー: {e}")
 
 
-def get_failed_attempts(minutes: int = 10) -> int:
+def get_failed_attempts(minutes: int = 10, ip_address: str = None) -> int:
     """
-    指定時間内の失敗したログイン試行回数を取得します
+    指定時間内の失敗したログイン試行回数を取得します（IPアドレス別）
     
     Args:
         minutes: 何分前までを対象とするか
+        ip_address: IPアドレス（指定された場合、そのIPのみカウント）
         
     Returns:
         int: 失敗回数
@@ -96,7 +130,9 @@ def get_failed_attempts(minutes: int = 10) -> int:
             try:
                 log_time = datetime.datetime.fromisoformat(log["timestamp"])
                 if log_time > cutoff_time and not log["success"]:
-                    failed_count += 1
+                    # IPアドレスが指定されている場合、そのIPのみカウント
+                    if ip_address is None or log.get("ip_address") == ip_address:
+                        failed_count += 1
             except (KeyError, ValueError):
                 continue
         
@@ -226,10 +262,13 @@ def check_password() -> bool:
             st.rerun()
         return True
     
-    # ログイン試行回数のチェック（6時間以内）
-    failed_attempts = get_failed_attempts(minutes=360)
+    # クライアントIPアドレスを取得
+    client_ip = get_client_ip()
+    
+    # ログイン試行回数のチェック（6時間以内・IPアドレスごと）
+    failed_attempts = get_failed_attempts(minutes=360, ip_address=client_ip)
     if failed_attempts >= max_attempts:
-        st.error(f"🚫 ログイン試行回数が上限に達しました。6時間後に再度お試しください。")
+        st.error(f"🚫 このアクセス元からのログイン試行回数が上限に達しました。6時間後に再度お試しください。")
         st.caption(f"過去6時間に{failed_attempts}回の失敗した試行がありました。")
         st.stop()
         return False
@@ -242,8 +281,8 @@ def check_password() -> bool:
     with st.expander("🛡️ セキュリティ情報"):
         st.markdown(f"""
         - **セッションタイムアウト：** {timeout_minutes}分
-        - **ログイン試行制限：** {max_attempts}回まで（6時間ロックアウト）
-        - **アクセスログ：** 記録されています
+        - **ログイン試行制限：** {max_attempts}回まで（IPアドレス別・6時間ロックアウト）
+        - **アクセスログ：** IPアドレス付きで記録されています
         """)
     
     st.info("この社内アプリにアクセスするには、パスワードを入力してください。")
@@ -263,19 +302,19 @@ def check_password() -> bool:
                 st.session_state.login_time = datetime.datetime.now()
                 
                 # ログ記録
-                log_access_attempt(success=True, username="user")
+                log_access_attempt(success=True, username="user", ip_address=client_ip)
                 
                 st.success("✅ 認証に成功しました！")
                 st.rerun()
             else:
                 # 認証失敗
-                log_access_attempt(success=False, username="user")
+                log_access_attempt(success=False, username="user", ip_address=client_ip)
                 
                 remaining_attempts = max_attempts - (failed_attempts + 1)
                 if remaining_attempts > 0:
                     st.error(f"❌ パスワードが正しくありません。残り試行回数: {remaining_attempts}回")
                 else:
-                    st.error("🚫 ログイン試行回数の上限に達しました。10分後に再度お試しください。")
+                    st.error("🚫 このアクセス元からのログイン試行回数の上限に達しました。6時間後に再度お試しください。")
                 return False
     
     st.markdown("---")
