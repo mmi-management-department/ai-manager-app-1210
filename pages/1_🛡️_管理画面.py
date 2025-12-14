@@ -149,6 +149,178 @@ def get_statistics(logs: list) -> dict:
     }
 
 
+def get_data_folders() -> list:
+    """dataフォルダ内のサブフォルダ一覧を取得します"""
+    data_dir = Path("data")
+    if not data_dir.exists():
+        return []
+    
+    folders = []
+    for item in data_dir.iterdir():
+        if item.is_dir():
+            folders.append(item.name)
+    
+    return sorted(folders)
+
+
+def save_uploaded_file(uploaded_file, target_folder: str) -> bool:
+    """アップロードされたファイルを保存します"""
+    try:
+        data_dir = Path("data") / target_folder
+        data_dir.mkdir(parents=True, exist_ok=True)
+        
+        file_path = data_dir / uploaded_file.name
+        
+        # ファイルを保存
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        
+        return True
+    except Exception as e:
+        st.error(f"ファイルの保存に失敗しました: {e}")
+        return False
+
+
+def get_folder_files(folder_name: str) -> list:
+    """指定フォルダ内のファイル一覧を取得します"""
+    folder_path = Path("data") / folder_name
+    if not folder_path.exists():
+        return []
+    
+    files = []
+    for item in folder_path.iterdir():
+        if item.is_file():
+            stat = item.stat()
+            files.append({
+                "name": item.name,
+                "size": stat.st_size,
+                "modified": datetime.datetime.fromtimestamp(stat.st_mtime)
+            })
+    
+    return sorted(files, key=lambda x: x["modified"], reverse=True)
+
+
+def format_file_size(size_bytes: int) -> str:
+    """ファイルサイズを読みやすい形式にフォーマットします"""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size_bytes < 1024.0:
+            return f"{size_bytes:.1f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.1f} TB"
+
+
+def show_file_management():
+    """ファイル管理タブの内容を表示します"""
+    st.markdown("## 📁 ファイル管理")
+    st.markdown("dataフォルダ内にファイルをアップロードできます。")
+    st.markdown("---")
+    
+    # フォルダ一覧を取得
+    folders = get_data_folders()
+    
+    if not folders:
+        st.warning("⚠️ dataフォルダ内にサブフォルダが見つかりませんでした。")
+        return
+    
+    # ファイルアップロードセクション
+    st.markdown("### 📤 ファイルアップロード")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        selected_folder = st.selectbox(
+            "アップロード先フォルダ",
+            folders,
+            help="ファイルをアップロードするフォルダを選択してください"
+        )
+    
+    with col2:
+        uploaded_files = st.file_uploader(
+            "ファイルを選択（複数可）",
+            accept_multiple_files=True,
+            help="PDF、Markdown、Word、Excel、PowerPointファイルなどをアップロードできます"
+        )
+    
+    if uploaded_files:
+        if st.button("📤 アップロード実行", type="primary", use_container_width=True):
+            success_count = 0
+            error_count = 0
+            
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            for i, uploaded_file in enumerate(uploaded_files):
+                status_text.text(f"アップロード中: {uploaded_file.name}")
+                
+                if save_uploaded_file(uploaded_file, selected_folder):
+                    success_count += 1
+                    st.success(f"✅ {uploaded_file.name} をアップロードしました")
+                else:
+                    error_count += 1
+                
+                progress_bar.progress((i + 1) / len(uploaded_files))
+            
+            status_text.empty()
+            progress_bar.empty()
+            
+            st.success(f"🎉 {success_count}個のファイルをアップロードしました！")
+            
+            if error_count > 0:
+                st.warning(f"⚠️ {error_count}個のファイルでエラーが発生しました。")
+            
+            # ベクターストア再生成の通知
+            st.markdown("---")
+            st.info("⚠️ **重要**: ファイルをアップロードした後は、ベクターストアを再生成する必要があります。")
+            st.markdown("""
+            **手順:**
+            1. ローカル環境で `scripts/deployment/create_vectorstore_openai.bat` を実行
+            2. 生成された `vectorstore` フォルダをGitHubにプッシュ
+            3. 新しい情報が検索可能になります
+            
+            または、管理者に再生成を依頼してください。
+            """)
+    
+    st.markdown("---")
+    
+    # ファイル一覧表示
+    st.markdown("### 📋 ファイル一覧")
+    
+    selected_view_folder = st.selectbox(
+        "表示するフォルダ",
+        folders,
+        key="view_folder"
+    )
+    
+    files = get_folder_files(selected_view_folder)
+    
+    if not files:
+        st.info(f"📂 `{selected_view_folder}` フォルダにファイルがありません。")
+    else:
+        st.caption(f"📊 合計 {len(files)} ファイル")
+        
+        # ファイル情報をDataFrameに変換
+        file_df_data = []
+        for file_info in files:
+            file_df_data.append({
+                "ファイル名": file_info["name"],
+                "サイズ": format_file_size(file_info["size"]),
+                "更新日時": file_info["modified"].strftime("%Y-%m-%d %H:%M:%S")
+            })
+        
+        file_df = pd.DataFrame(file_df_data)
+        
+        st.dataframe(
+            file_df,
+            use_container_width=True,
+            hide_index=True,
+            height=400
+        )
+    
+    st.markdown("---")
+    st.caption("💡 サポートされるファイル形式: PDF, Markdown (.md), Word (.docx), Excel (.xlsx), PowerPoint (.pptx)")
+    st.caption("⚠️ アップロード後は必ずベクターストアを再生成してください")
+
+
 def main():
     """メイン処理"""
     # 管理者認証チェック
@@ -157,7 +329,6 @@ def main():
     
     # ヘッダー
     st.markdown("# 🛡️ 管理画面")
-    st.markdown("### アクセスログと統計情報")
     st.markdown("---")
     
     # ログアウトボタン
@@ -166,6 +337,21 @@ def main():
         if st.button("🚪 ログアウト", use_container_width=True):
             st.session_state.admin_authenticated = False
             st.rerun()
+    
+    # タブで機能を切り替え
+    tab1, tab2 = st.tabs(["📊 アクセスログ", "📁 ファイル管理"])
+    
+    with tab1:
+        show_access_logs()
+    
+    with tab2:
+        show_file_management()
+
+
+def show_access_logs():
+    """アクセスログタブの内容を表示します"""
+    st.markdown("## 📊 アクセスログと統計情報")
+    st.markdown("---")
     
     # ログを読み込む
     logs = load_access_logs()
