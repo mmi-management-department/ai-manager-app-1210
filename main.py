@@ -33,12 +33,6 @@ st.set_page_config(
     page_title=ct.APP_NAME
 )
 
-# カスタムCSS + JavaScriptを適用（エムエムインターナショナルブランド）
-import ui_styles
-import ui_javascript
-ui_styles.apply_custom_css()
-ui_javascript.apply_javascript_features()
-
 # アバター・ロゴ用のスタイルを適用
 avatar_manager.apply_avatar_styles()
 
