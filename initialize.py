@@ -130,24 +130,31 @@ def initialize_retriever():
             if not google_api_key and "GOOGLE_API_KEY" in st.secrets:
                 google_api_key = st.secrets["GOOGLE_API_KEY"]
             
-            # どちらの埋め込みモデルを使うかを決定
-            # OpenAI APIキーがある場合は OpenAI Embeddings を優先
-            # それ以外は Google Gemini Embeddings を使用
+            # ベクターストアはOpenAI Embeddingsで作成されているため、
+            # 読み込み時もOpenAI Embeddingsを使用する必要があります
             if openai_api_key:
-                st.info("💡 OpenAI Embeddings を使用します")
+                st.info("💡 OpenAI Embeddings を使用してベクターストアを読み込みます")
                 from langchain_openai import OpenAIEmbeddings
                 embeddings = OpenAIEmbeddings(
                     model=ct.EMBEDDING_MODEL_OPENAI,
                     openai_api_key=openai_api_key
                 )
-            elif google_api_key:
-                st.info("💡 Google Gemini Embeddings を使用します（完全無料）")
-                embeddings = GoogleGenerativeAIEmbeddings(
-                    model=ct.EMBEDDING_MODEL,
-                    google_api_key=google_api_key
-                )
             else:
-                st.error("❌ OPENAI_API_KEY または GOOGLE_API_KEY が見つかりません")
+                st.error("""
+                ❌ **OpenAI APIキーが見つかりません**
+                
+                このベクターストアはOpenAI Embeddingsで作成されています。
+                読み込むには以下のいずれかの対応が必要です：
+                
+                1. **Streamlit SecretsにOpenAI APIキーを追加**（推奨）
+                   - Settings → Secrets で `OPENAI_API_KEY = "sk-..."` を追加
+                   - 読み込み時のみ使用（費用はほぼゼロ）
+                
+                2. **ベクターストアをGemini Embeddingsで再作成**（完全無料）
+                   - ローカルで `switch_to_free.bat` を実行
+                   - GitHubにプッシュして再デプロイ
+                """)
+                raise ValueError("OPENAI_API_KEY が設定されていません。ベクターストアの読み込みに失敗しました。")
                 st.write("利用可能なSecretsのキー:", list(st.secrets.keys()))
                 raise ValueError(
                     "OPENAI_API_KEY または GOOGLE_API_KEY が設定されていません。\n"
