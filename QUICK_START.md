@@ -139,3 +139,5 @@ pip install -r requirements.txt
 *最終更新：2025年12月14日*  
 *株式会社エムエムインターナショナル*
 
+
+

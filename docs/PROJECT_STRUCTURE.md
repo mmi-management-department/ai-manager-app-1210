@@ -288,3 +288,5 @@ scripts\utils\git_commit_version.bat
 *最終更新：2025年12月14日*  
 *株式会社エムエムインターナショナル*
 
+
+
