@@ -167,7 +167,19 @@ def initialize_retriever():
                 embedding_function=embeddings
             )
             
-            st.success("✓ ベクターストアの読み込みが完了しました")
+            # ベクターストアの内容を確認（デバッグ用）
+            try:
+                collection = db._collection
+                doc_count = collection.count()
+                st.info(f"📊 ベクターストア内のドキュメント数: {doc_count}件")
+                
+                if doc_count == 0:
+                    st.error("⚠️ ベクターストアが空です！ベクターストアを再作成する必要があります。")
+                else:
+                    st.success(f"✓ ベクターストアの読み込みが完了しました（{doc_count}件のドキュメント）")
+            except Exception as e:
+                st.warning(f"ベクターストアの確認中にエラー: {e}")
+                st.success("✓ ベクターストアの読み込みが完了しました")
             
             # ベクターストアを検索するRetrieverの作成
             st.session_state.retriever = db.as_retriever(search_kwargs={"k": ct.RETRIEVER_SEARCH_K})
