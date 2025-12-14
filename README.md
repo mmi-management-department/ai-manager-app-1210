@@ -6,6 +6,30 @@
 
 - **社内文書検索モード**: 入力内容と関連性が高い社内文書を検索
 - **社内問い合わせモード**: 質問に対してAIが回答を生成し、参照文書を表示
+- **パスワード認証**: 社内限定アクセス制御
+- **アバター表示**: AI管理部長の動くアバター
+- **Google Drive連携**: Google Driveからのファイル参照（オプション）
+
+## 📁 プロジェクト構造
+
+```
+プロジェクトルート/
+├── assets/images/        # 画像ファイル（ロゴ、アバター）
+├── config/               # 設定ファイルテンプレート
+├── docs/                 # ドキュメント
+│   ├── guides/          # 各種ガイド
+│   ├── summaries/       # 各種サマリー
+│   └── deployment/      # デプロイ関連
+├── scripts/              # スクリプト
+│   ├── setup/           # セットアップスクリプト
+│   ├── deployment/      # デプロイスクリプト
+│   └── utils/           # ユーティリティスクリプト
+├── requirements/         # 依存関係ファイル
+├── data/                 # アプリが参照するデータ
+└── *.py                  # メインPythonファイル
+```
+
+詳細は `docs/PROJECT_STRUCTURE.md` を参照してください。
 
 ## 技術スタック
 
@@ -47,7 +71,7 @@ source env/bin/activate
 
 ```bash
 # Windows
-pip install -r requirements_windows.txt
+pip install -r requirements/requirements_windows.txt
 
 # Mac
 pip install -r requirements_mac.txt
