@@ -344,11 +344,80 @@ def file_load(path, docs_all):
                 docs_all.append(doc)
             except Exception as e:
                 print(f"Warning: Failed to load PowerPoint file {path}: {e}")
+        # 画像ファイルの場合は特別な処理
+        elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+            try:
+                from langchain.docstore.document import Document
+                import os
+                from datetime import datetime
+                
+                # ファイルのメタデータを取得
+                file_stat = os.stat(path)
+                file_size_kb = round(file_stat.st_size / 1024, 2)
+                modified_time = datetime.fromtimestamp(file_stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                
+                # ファイル名から情報を抽出
+                file_name_only = os.path.splitext(os.path.basename(path))[0]
+                
+                # メタデータをテキスト化
+                content = f"""画像ファイル: {file_name_only}
+ファイル形式: {file_extension.upper()}
+ファイルパス: {path}
+ファイルサイズ: {file_size_kb} KB
+最終更新日時: {modified_time}
+
+このファイルは画像ファイルです。
+ファイル名: {file_name_only}
+"""
+                
+                # ドキュメントとして追加
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": path, "type": "image"}
+                )
+                docs_all.append(doc)
+            except Exception as e:
+                print(f"Warning: Failed to load image file {path}: {e}")
+        # 動画ファイルの場合は特別な処理
+        elif file_extension in ['.mp4', '.avi', '.mov', '.wmv', '.mkv']:
+            try:
+                from langchain.docstore.document import Document
+                import os
+                from datetime import datetime
+                
+                # ファイルのメタデータを取得
+                file_stat = os.stat(path)
+                file_size_mb = round(file_stat.st_size / (1024 * 1024), 2)
+                modified_time = datetime.fromtimestamp(file_stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                
+                # ファイル名から情報を抽出
+                file_name_only = os.path.splitext(os.path.basename(path))[0]
+                
+                # メタデータをテキスト化
+                content = f"""動画ファイル: {file_name_only}
+ファイル形式: {file_extension.upper()}
+ファイルパス: {path}
+ファイルサイズ: {file_size_mb} MB
+最終更新日時: {modified_time}
+
+このファイルは動画ファイルです。
+ファイル名: {file_name_only}
+"""
+                
+                # ドキュメントとして追加
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": path, "type": "video"}
+                )
+                docs_all.append(doc)
+            except Exception as e:
+                print(f"Warning: Failed to load video file {path}: {e}")
         else:
             # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
-            loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
-            docs = loader.load()
-            docs_all.extend(docs)
+            if ct.SUPPORTED_EXTENSIONS[file_extension] is not None:
+                loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
+                docs = loader.load()
+                docs_all.extend(docs)
 
 
 def adjust_string(s):

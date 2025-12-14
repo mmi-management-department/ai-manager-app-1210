@@ -238,7 +238,7 @@ def show_file_management():
         uploaded_files = st.file_uploader(
             "ファイルを選択（複数可）",
             accept_multiple_files=True,
-            help="PDF、Markdown、Word、Excel、PowerPointファイルなどをアップロードできます"
+            help="PDF、Word、Excel、PowerPoint、Markdown、画像（JPG/PNG/GIF等）、動画（MP4/AVI/MOV等）をアップロードできます"
         )
     
     if uploaded_files:

@@ -65,7 +65,20 @@ SUPPORTED_EXTENSIONS = {
     ".xlsx": None,  # Custom loader in initialize.py
     ".xls": None,  # Custom loader in initialize.py
     ".pptx": None,  # Custom loader in initialize.py
-    ".ppt": None  # Custom loader in initialize.py
+    ".ppt": None,  # Custom loader in initialize.py
+    # Image formats
+    ".jpg": None,  # Custom loader in initialize.py
+    ".jpeg": None,  # Custom loader in initialize.py
+    ".png": None,  # Custom loader in initialize.py
+    ".gif": None,  # Custom loader in initialize.py
+    ".bmp": None,  # Custom loader in initialize.py
+    ".webp": None,  # Custom loader in initialize.py
+    # Video formats
+    ".mp4": None,  # Custom loader in initialize.py
+    ".avi": None,  # Custom loader in initialize.py
+    ".mov": None,  # Custom loader in initialize.py
+    ".wmv": None,  # Custom loader in initialize.py
+    ".mkv": None  # Custom loader in initialize.py
 }
 WEB_URL_LOAD_TARGETS = [
     "https://generative-ai.web-camp.io/"
