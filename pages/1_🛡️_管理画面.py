@@ -182,20 +182,34 @@ def save_uploaded_file(uploaded_file, target_folder: str) -> bool:
 
 
 def get_folder_files(folder_name: str) -> list:
-    """指定フォルダ内のファイル一覧を取得します"""
+    """指定フォルダ内のファイル一覧を取得します（サブフォルダを含む）"""
     folder_path = Path("data") / folder_name
     if not folder_path.exists():
         return []
     
     files = []
-    for item in folder_path.iterdir():
-        if item.is_file():
-            stat = item.stat()
-            files.append({
-                "name": item.name,
-                "size": stat.st_size,
-                "modified": datetime.datetime.fromtimestamp(stat.st_mtime)
-            })
+    
+    def scan_directory(directory: Path, base_path: Path):
+        """ディレクトリを再帰的にスキャンします"""
+        for item in directory.iterdir():
+            if item.is_file():
+                try:
+                    stat = item.stat()
+                    # 相対パスを取得（data/フォルダ名からの相対パス）
+                    relative_path = item.relative_to(base_path)
+                    files.append({
+                        "name": str(relative_path),
+                        "size": stat.st_size,
+                        "modified": datetime.datetime.fromtimestamp(stat.st_mtime)
+                    })
+                except Exception:
+                    # エラーが発生したファイルはスキップ
+                    pass
+            elif item.is_dir():
+                # サブディレクトリを再帰的にスキャン
+                scan_directory(item, base_path)
+    
+    scan_directory(folder_path, folder_path)
     
     return sorted(files, key=lambda x: x["modified"], reverse=True)
 
