@@ -54,6 +54,8 @@ TEMPERATURE = 0.5
 # RAG参照用のデータソース系
 # ==========================================
 RAG_TOP_FOLDER_PATH = "./data"
+# 複数のフォルダを検索対象にする場合
+RAG_FOLDER_PATHS = ["./data", "./data_backup"]
 SUPPORTED_EXTENSIONS = {
     ".pdf": PyMuPDFLoader,
     ".docx": Docx2txtLoader,

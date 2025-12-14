@@ -74,7 +74,7 @@ class LogoManager:
 class AvatarManager:
     """アバター管理クラス"""
     
-    AVATAR_PATH = "assets/images/manager_avatar.jfif"
+    AVATAR_PATH = "assets/images/ai_manager_avatar.png"
     
     # かわいい管理部長アバター（40代男性）のSVG
     AVATAR_SVG = """
@@ -268,18 +268,32 @@ def apply_avatar_styles():
             margin: 10px 0;
         }
         
-        /* 話しているアニメーション */
+        /* 話しているアニメーション（強化版） */
         .avatar-talking {
-            animation: avatar-bounce 0.8s ease-in-out infinite;
+            animation: avatar-bounce 1.2s ease-in-out infinite;
             border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-talking:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
         
         @keyframes avatar-bounce {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            25% { transform: translateY(-2px) scale(1.02); }
-            50% { transform: translateY(0px) scale(1); }
-            75% { transform: translateY(-2px) scale(1.02); }
+            0%, 100% { 
+                transform: translateY(0px) scale(1) rotate(0deg); 
+            }
+            25% { 
+                transform: translateY(-4px) scale(1.03) rotate(-1deg); 
+            }
+            50% { 
+                transform: translateY(0px) scale(1) rotate(0deg); 
+            }
+            75% { 
+                transform: translateY(-4px) scale(1.03) rotate(1deg); 
+            }
         }
         
         /* ロゴのホバー効果 */
@@ -322,10 +336,10 @@ def show_welcome_screen():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # アバター表示（中央配置）
+    # アバター表示（中央配置、大きめサイズ）
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        AvatarManager.show_avatar(talking=False, size=150)
+        AvatarManager.show_avatar(talking=True, size=250)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -348,10 +362,10 @@ def show_sidebar_branding():
         
         st.markdown("---")
         
-        # アバター（小さめ、中央配置）
+        # アバター（中サイズ、中央配置、動くアニメーション）
         col1, col2, col3 = st.columns([0.5, 2, 0.5])
         with col2:
-            AvatarManager.show_avatar(talking=False, size=80)
+            AvatarManager.show_avatar(talking=True, size=120)
         
         st.markdown(
             """

@@ -218,8 +218,14 @@ def load_data_sources():
     """
     # データソースを格納する用のリスト
     docs_all = []
-    # ファイル読み込みの実行（渡した各リストにデータが格納される）
-    recursive_file_check(ct.RAG_TOP_FOLDER_PATH, docs_all)
+    
+    # 複数のフォルダから読み込む
+    for folder_path in ct.RAG_FOLDER_PATHS:
+        if os.path.exists(folder_path):
+            print(f"📂 読み込み中: {folder_path}")
+            recursive_file_check(folder_path, docs_all)
+        else:
+            print(f"⚠️ フォルダが見つかりません: {folder_path}")
 
     web_docs_all = []
     # ファイルとは別に、指定のWebページ内のデータも読み込み
