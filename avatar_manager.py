@@ -43,12 +43,28 @@ class LogoManager:
         
         if logo_path.exists():
             # 実際のロゴファイルが存在する場合
-            if use_column:
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
-                    st.image(str(logo_path), width=width)
-            else:
-                st.image(str(logo_path), width=width)
+            # Windows日本語パス対応：バイナリモードで読み込む
+            try:
+                with open(logo_path, 'rb') as f:
+                    logo_data = f.read()
+                
+                if use_column:
+                    col1, col2, col3 = st.columns([1, 2, 1])
+                    with col2:
+                        st.image(logo_data, width=width)
+                else:
+                    st.image(logo_data, width=width)
+            except Exception:
+                # 読み込みエラー時はプレースホルダーを表示
+                if use_column:
+                    col1, col2, col3 = st.columns([1, 2, 1])
+                    with col2:
+                        st.markdown(
+                            f'<div style="text-align: center;">{LogoManager.LOGO_PLACEHOLDER_SVG}</div>',
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.markdown(LogoManager.LOGO_PLACEHOLDER_SVG, unsafe_allow_html=True)
         else:
             # プレースホルダーSVGを表示
             if use_column:
@@ -154,7 +170,14 @@ class AvatarManager:
                     unsafe_allow_html=True
                 )
             else:
-                st.image(str(avatar_path), width=size)
+                # Windows日本語パス対応：バイナリモードで読み込む
+                try:
+                    with open(avatar_path, 'rb') as f:
+                        avatar_data = f.read()
+                    st.image(avatar_data, width=size)
+                except Exception:
+                    # 読み込みエラー時はSVGアバターを表示
+                    st.markdown(AvatarManager.AVATAR_PLACEHOLDER_SVG, unsafe_allow_html=True)
         else:
             # SVGアバターを表示
             if talking:
@@ -503,7 +526,13 @@ class IconManager:
         if icon_file:
             icon_path = IconManager.ICONS_DIR / icon_file
             if icon_path.exists():
-                st.image(str(icon_path), width=size)
+                # Windows日本語パス対応：バイナリモードで読み込む
+                try:
+                    with open(icon_path, 'rb') as f:
+                        icon_data = f.read()
+                    st.image(icon_data, width=size)
+                except Exception:
+                    pass  # アイコン読み込み失敗時は何も表示しない
                 return
         
         # フォールバック：絵文字
@@ -579,7 +608,13 @@ class IllustrationManager:
         with col2:
             empty_state_path = IllustrationManager.DECORATIONS_DIR / "empty_state.svg"
             if empty_state_path.exists():
-                st.image(str(empty_state_path), width=size)
+                # Windows日本語パス対応：バイナリモードで読み込む
+                try:
+                    with open(empty_state_path, 'rb') as f:
+                        empty_data = f.read()
+                    st.image(empty_data, width=size)
+                except Exception:
+                    pass  # 画像読み込み失敗時は何も表示しない
             
             st.markdown(
                 f"""
