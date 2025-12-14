@@ -9,6 +9,13 @@ OpenAI APIを使ってローカルでベクターストアを事前作成する�
 """
 
 import os
+import sys
+from pathlib import Path
+
+# プロジェクトルートをPythonパスに追加
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from dotenv import load_dotenv
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -16,6 +23,9 @@ from langchain_openai import OpenAIEmbeddings
 
 import constants as ct
 from initialize import load_data_sources, adjust_string
+
+# 作業ディレクトリをプロジェクトルートに変更
+os.chdir(project_root)
 
 # 環境変数の読み込み
 load_dotenv()
@@ -25,6 +35,8 @@ def create_vectorstore():
     
     print("=" * 60)
     print("ベクターストア作成スクリプト (OpenAI API)")
+    print("=" * 60)
+    print(f"📁 作業ディレクトリ: {os.getcwd()}")
     print("=" * 60)
     
     # ステップ1: データの読み込み
@@ -53,12 +65,14 @@ def create_vectorstore():
     
     print(f"✓ APIキーを取得しました（先頭10文字: {openai_api_key[:10]}...）")
     
-    # OpenAI Embeddingsを使用
+    # OpenAI Embeddingsを使用（バッチサイズを制御）
     embeddings = OpenAIEmbeddings(
         model=ct.EMBEDDING_MODEL_OPENAI,
-        openai_api_key=openai_api_key
+        openai_api_key=openai_api_key,
+        chunk_size=100  # 1回のAPIリクエストで処理するテキスト数を制限
     )
     print("✓ 埋め込みモデルの初期化が完了しました")
+    print("  - バッチサイズ: 100テキスト/リクエスト（トークン制限対応）")
     
     # ステップ4: ドキュメントの分割
     print("\n🔄 ドキュメントを分割しています...")
@@ -73,6 +87,8 @@ def create_vectorstore():
     # ステップ5: ベクターストアの作成と保存
     print("\n🔄 ベクターストアを作成しています（これには数分かかる場合があります）...")
     print("⚠️ この処理中にOpenAI APIのクォータを消費します（少額の費用）")
+    print(f"📊 処理: {len(splitted_docs)}チャンク ÷ 100 = 約{len(splitted_docs)//100 + 1}回のAPIリクエスト")
+    print("⏳ 予想時間: 3～5分")
     
     # persist_directoryを指定してローカルに保存
     db = Chroma.from_documents(
@@ -97,8 +113,8 @@ def create_vectorstore():
     print("   git push origin main")
     print("3. Streamlit Cloudでアプリを再起動")
     print("\n💰 コスト:")
-    print(f"   - 216チャンク × OpenAI Embedding API")
-    print(f"   - 推定コスト: 約$0.01-0.02（1-2円程度）")
+    print(f"   - {len(splitted_docs)}チャンク × OpenAI Embedding API")
+    print(f"   - 推定コスト: 約$0.02-0.05（3-7円程度）")
 
 if __name__ == "__main__":
     try:

@@ -32,9 +32,9 @@ echo.
 
 echo [3/3] ベクターストアを作成中 (OpenAI API使用)...
 echo これには3-5分かかる場合があります。お待ちください...
-echo 💰 推定コスト: 約1-2円程度
+echo 💰 推定コスト: 約3-7円程度
 echo.
-python create_vectorstore_openai.py
+python scripts\deployment\create_vectorstore_openai.py
 if errorlevel 1 (
     echo.
     echo エラー: ベクターストアの作成に失敗しました
@@ -58,7 +58,7 @@ echo    git commit -m "Add pre-built vectorstore (OpenAI)"
 echo    git push origin main
 echo 3. Streamlit Cloudでアプリを再起動
 echo.
-echo 💰 今回のコスト: 約1-2円程度
+echo 💰 今回のコスト: 約3-7円程度
 echo.
 pause
 
