@@ -207,6 +207,10 @@ def initialize_session_state():
         st.session_state.messages = []
         # 「LLMとのやりとり用」の会話ログを順次格納するリストを用意
         st.session_state.chat_history = []
+    
+    # モードの初期値を「社内問い合わせ」に設定
+    if "mode" not in st.session_state:
+        st.session_state.mode = ct.ANSWER_MODE_2  # 「社内問い合わせ」
 
 
 def load_data_sources():

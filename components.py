@@ -45,10 +45,19 @@ def display_select_mode():
         </div>
         """, unsafe_allow_html=True)
         
+        # デフォルト値を取得（session_stateに値があればそれを使用）
+        default_index = 1  # 「社内問い合わせ」をデフォルトに
+        if "mode" in st.session_state:
+            # 既存のmodeから適切なindexを計算
+            if st.session_state.mode == ct.ANSWER_MODE_1:
+                default_index = 0
+            elif st.session_state.mode == ct.ANSWER_MODE_2:
+                default_index = 1
+        
         st.session_state.mode = st.radio(
             label="利用目的を選択してください",
             options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
-            index=1,  # デフォルトで「社内問い合わせ」を選択
+            index=default_index,
             label_visibility="collapsed"
         )
 
