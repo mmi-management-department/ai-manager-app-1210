@@ -23,6 +23,8 @@ import components as cn
 import constants as ct
 # （自作）ロゴ・アバター管理モジュール
 import avatar_manager
+# （自作）UI強化モジュール
+import ui_components as ui
 
 
 ############################################################
@@ -75,6 +77,9 @@ st.markdown("""
 
 # アバター・ロゴ用のスタイルを適用
 avatar_manager.apply_avatar_styles()
+
+# クリーンパターン背景を適用（オプション）
+# ui.BackgroundManager.apply_clean_pattern_background()
 
 # ログ出力を行うためのロガーの設定
 logger = logging.getLogger(ct.LOGGER_NAME)

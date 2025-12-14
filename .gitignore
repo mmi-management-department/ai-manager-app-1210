@@ -76,10 +76,11 @@ initialize_gemini_backup.py
 initialize_openai_backup.py
 
 # 画像アセット（実際の画像のみ、READMEは管理）
-assets/images/*.png
-assets/images/*.jpg
-assets/images/*.jpeg
-assets/images/*.gif
+# 注: アバター画像とロゴは除外しない
+assets/images/backups/*.png
+assets/images/backups/*.jpg
+assets/images/backups/*.jpeg
+assets/images/backups/*.gif
 !assets/images/README.md
 
 # Google Drive認証情報・設定
