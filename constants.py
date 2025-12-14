@@ -18,7 +18,7 @@ from langchain_community.document_loaders.csv_loader import CSVLoader
 # ==========================================
 APP_NAME = "社内情報検索AI<br>- 株式会社エムエムインターナショナル<br>AI管理部長"
 ANSWER_MODE_1 = "社内文書検索"
-ANSWER_MODE_2 = "社内問い合わせ"
+ANSWER_MODE_2 = "管理部への問い合わせ"
 CHAT_INPUT_HELPER_TEXT = "こちらからメッセージを送信してください。"
 DOC_SOURCE_ICON = ":material/description: "
 LINK_SOURCE_ICON = ":material/link: "
