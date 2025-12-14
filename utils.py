@@ -143,12 +143,12 @@ def get_llm_response(chat_message):
                 "from_cache": True
             }
         
-        # 4. LLMのオブジェクトを用意（OpenAI or Google Gemini）
+        # 4. LLMのオブジェクトを用意（OpenAI優先、フォールバックはGoogle Gemini）
         # APIキーの取得（環境変数またはStreamlit Secrets）
         openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
         google_api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
         
-        # OpenAI APIキーが利用可能な場合はOpenAIを優先使用
+        # OpenAI APIキーが利用可能な場合はOpenAIを優先使用（制限回避のため）
         if openai_api_key:
             llm = ChatOpenAI(
                 model="gpt-3.5-turbo",
@@ -156,6 +156,7 @@ def get_llm_response(chat_message):
                 max_retries=2,
                 openai_api_key=openai_api_key
             )
+            st.session_state.setdefault("llm_type", "OpenAI")
         elif google_api_key:
             llm = ChatGoogleGenerativeAI(
                 model=ct.MODEL,
@@ -163,8 +164,12 @@ def get_llm_response(chat_message):
                 max_retries=2,
                 google_api_key=google_api_key
             )
+            st.session_state.setdefault("llm_type", "Google Gemini")
         else:
-            raise ValueError("OPENAI_API_KEY または GOOGLE_API_KEY が設定されていません。")
+            raise ValueError(
+                "OPENAI_API_KEY または GOOGLE_API_KEY が設定されていません。\n"
+                "Streamlit Cloud Secretsで設定してください。"
+            )
 
         # 5. 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのプロンプトテンプレートを作成
         question_generator_template = ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT

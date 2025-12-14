@@ -361,17 +361,27 @@ class ErrorHandler:
         
         # レート制限エラー
         if "rate" in error_str or "quota" in error_str or "429" in error_str:
-            return """⚠️ APIの利用制限に達しました。
+            return """⚠️ Google Gemini APIの利用制限に達しました。
 
-**考えられる原因：**
-- Google Gemini APIの無料枠の制限に達しています
-- 短時間に多くのリクエストが送信されました
+**📊 現状:**
+- Google Gemini API無料枠が枯渇しています
+- 制限は24時間後にリセットされます
 
-**対処法：**
-1. 数分待ってから再度お試しください
-2. それでも解決しない場合は、管理者にお問い合わせください
+**✅ 即時解決策（推奨）:**
+OpenAI APIキーを使用することで、すぐに利用可能になります。
 
-※ このエラーが頻繁に発生する場合は、APIキーの確認が必要です。"""
+**設定方法:**
+1. Streamlit Cloud（https://share.streamlit.io）にアクセス
+2. アプリの「⚙️ Settings」→「Secrets」を開く
+3. 以下を追加して「Save」をクリック:
+   ```
+   OPENAI_API_KEY = "あなたのOpenAI APIキー"
+   ```
+
+**⏳ 代替策:**
+24時間待ってから再度お試しください（Google Gemini APIの制限がリセットされます）
+
+※ OpenAI APIキーについては、管理者にお問い合わせください。"""
         
         # タイムアウトエラー
         if "timeout" in error_str:
