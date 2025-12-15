@@ -8,12 +8,12 @@ font = "sans serif"
 [server]
 headless = true
 port = 8501
-enableCORS = false
+enableCORS = true
 enableXsrfProtection = true
+maxUploadSize = 200
 
 [browser]
 gatherUsageStats = false
-serverAddress = "localhost"
 
 [logger]
 level = "info"

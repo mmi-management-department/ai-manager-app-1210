@@ -1,0 +1,63 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/*.log
+logs/*.json
+
+# Environment variables
+.env
+.env.local
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+*.bat
+
+# Backups
+*.bak
+*.backup
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Large files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.mkv
+
+# Temporary files
+*.tmp
+*.temp
+

@@ -142,3 +142,5 @@ streamlit run main.py
 *修正完了日: 2025年12月14日*
 
 
+
+

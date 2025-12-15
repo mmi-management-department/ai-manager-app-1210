@@ -327,25 +327,66 @@ def file_load(path, docs_all):
                 # PowerPointファイルを読み込む
                 prs = Presentation(path)
                 
+                # ファイル名から情報を抽出
+                file_name_only = os.path.splitext(os.path.basename(path))[0]
+                
                 # テキストを抽出
-                text_content = []
+                text_content = [f"PowerPointファイル: {file_name_only}\n"]
+                
                 for slide_num, slide in enumerate(prs.slides, 1):
-                    slide_text = f"\n--- Slide {slide_num} ---\n"
+                    slide_text = f"\n=== スライド {slide_num} ===\n"
+                    
+                    # スライド内のすべてのシェイプからテキストを抽出
                     for shape in slide.shapes:
-                        if hasattr(shape, "text"):
-                            slide_text += shape.text + "\n"
-                    text_content.append(slide_text)
+                        # テキストを含むシェイプ
+                        if hasattr(shape, "text") and shape.text.strip():
+                            slide_text += shape.text.strip() + "\n"
+                        
+                        # 表を含むシェイプ
+                        if shape.has_table:
+                            table = shape.table
+                            slide_text += "\n[表]\n"
+                            for row in table.rows:
+                                row_text = " | ".join([cell.text.strip() for cell in row.cells if cell.text.strip()])
+                                if row_text:
+                                    slide_text += row_text + "\n"
+                        
+                        # テキストフレームを含むシェイプ
+                        if hasattr(shape, "text_frame"):
+                            for paragraph in shape.text_frame.paragraphs:
+                                para_text = paragraph.text.strip()
+                                if para_text:
+                                    slide_text += para_text + "\n"
+                    
+                    # スライドのノート部分も抽出
+                    if slide.has_notes_slide:
+                        notes_slide = slide.notes_slide
+                        notes_text_frame = notes_slide.notes_text_frame
+                        if notes_text_frame and notes_text_frame.text.strip():
+                            slide_text += f"\n[ノート]\n{notes_text_frame.text.strip()}\n"
+                    
+                    if slide_text.strip():
+                        text_content.append(slide_text)
                 
                 content = "\n".join(text_content)
                 
-                # ドキュメントとして追加
-                doc = Document(
-                    page_content=content,
-                    metadata={"source": path}
-                )
-                docs_all.append(doc)
+                # デバッグ: 抽出されたテキストの長さを確認
+                print(f"PowerPoint file {path}: extracted {len(content)} characters from {len(prs.slides)} slides")
+                
+                # 内容が空でない場合のみドキュメントとして追加
+                if content.strip() and len(content) > 50:  # 最低50文字以上
+                    doc = Document(
+                        page_content=content,
+                        metadata={"source": path, "file_type": "PowerPoint", "slide_count": len(prs.slides)}
+                    )
+                    docs_all.append(doc)
+                    print(f"Successfully loaded PowerPoint file: {path}")
+                else:
+                    print(f"Warning: PowerPoint file {path} has insufficient content (length: {len(content)})")
             except Exception as e:
                 print(f"Warning: Failed to load PowerPoint file {path}: {e}")
+                import traceback
+                traceback.print_exc()
         # 画像ファイルの場合は特別な処理
         elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
             try:

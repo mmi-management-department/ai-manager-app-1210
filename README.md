@@ -118,107 +118,113 @@ streamlit run main.py
 
 ブラウザで `http://localhost:8501` が自動的に開きます。
 
-## WEBへのデプロイ（Streamlit Community Cloud）
+## 🌐 WEB公開
 
-### 準備
+### 🎯 現在の状態
 
-1. **GitHubリポジトリの作成**
-   - GitHubで新しいリポジトリを作成
-   - ローカルのコードをプッシュ
+アプリは既に起動しており、以下のURLでアクセス可能です：
 
+- **ローカル**: http://localhost:8501
+- **社内ネットワーク**: http://192.168.3.178:8501
+- **外部**: http://36.240.126.113:8501（ポートフォワーディング設定が必要）
+
+### 📚 詳細ガイド
+
+- **クイックスタート**: `QUICK_START_WEB.md` - 最速でWEB公開する方法
+- **完全ガイド**: `WEB_DEPLOYMENT_GUIDE.md` - すべてのデプロイオプション
+- **チェックリスト**: `DEPLOY_CHECKLIST.md` - デプロイ前の確認事項
+
+### 🏢 社内ネットワークで共有（最も簡単）
+
+同じネットワーク内のユーザーに以下のURLを共有するだけです：
+
+```
+http://192.168.3.178:8501
+```
+
+**注意**: 
+- 同じWi-Fiネットワークに接続している必要があります
+- PCがシャットダウンするとアクセスできなくなります
+
+### ☁️ Streamlit Cloudでデプロイ（推奨）
+
+#### クイックスタート（5分）
+
+1. **GitHubにプッシュ**
 ```bash
-git init
 git add .
-git commit -m "Initial commit"
-git remote add origin <your-github-repo-url>
+git commit -m "Prepare for web deployment"
 git push -u origin main
 ```
 
-⚠️ **重要**: `.gitignore` により、以下のファイル/ディレクトリはGitにコミットされません：
-- `.env` (APIキー)
-- `data/` (社内文書)
-- `.streamlit/secrets.toml` (機密情報)
-- `logs/` (ログファイル)
-
-### Streamlit Community Cloudでのデプロイ
-
-1. **Streamlit Community Cloudにアクセス**
-   - https://streamlit.io/cloud にアクセス
-   - GitHubアカウントでサインイン
-
-2. **新しいアプリをデプロイ**
+2. **Streamlit Cloudでデプロイ**
+   - https://share.streamlit.io/ にアクセス
+   - GitHubでサインイン
    - "New app" をクリック
-   - リポジトリ、ブランチ、メインファイル（`main.py`）を選択
-   - "Advanced settings" をクリック
+   - リポジトリ情報を入力して "Deploy"
 
-3. **環境変数（Secrets）の設定**
-   
-   "Secrets" セクションに以下を入力：
-
+3. **Secretsを設定**
+   - Settings → Secrets に移動
+   - 以下を貼り付け:
 ```toml
-OPENAI_API_KEY = "sk-your-actual-api-key-here"
+GOOGLE_API_KEY = "AIzaSyCVOryUeFaYf1n8Oun9wAh9RxGYD4MkKuY"
+
+[auth]
+password = "your_secure_password_here"
 ```
 
-4. **データファイルのアップロード**
+4. **完了！** アプリが自動的にデプロイされます
 
-   社内文書は機密情報のため、以下のいずれかの方法で対応：
+⚠️ **重要**: リポジトリは**プライベート**に設定してください
 
-   **方法A: プライベートリポジトリを使用**
-   - GitHubリポジトリをプライベートに設定
-   - `data/` ディレクトリをコミット（この場合、`.gitignore`から`data/`を削除）
-
-   **方法B: 外部ストレージを使用**
-   - AWS S3、Google Cloud Storage等に文書を保存
-   - アプリ起動時にダウンロードするコードを追加
-
-   **方法C: 小規模データの場合**
-   - Streamlit Cloudのファイルアップロード機能を使用（非推奨：大量のファイルには不向き）
-
-5. **デプロイ実行**
-   - "Deploy!" をクリック
-   - ビルドとデプロイが完了するまで待機（数分かかります）
-
-6. **アプリケーションの確認**
-   - デプロイ完了後、URLが発行されます（例: `https://your-app-name.streamlit.app`）
-   - アクセスして動作を確認
-
-### セキュリティ設定
-
-デプロイ後、以下のセキュリティ設定を推奨します：
-
-1. **アクセス制限**
-   - Streamlit Community Cloudの設定で、特定のメールドメインのみアクセス可能に設定
-   - または、アプリ内で認証機能を実装
-
-2. **HTTPS通信**
-   - Streamlit Cloudは自動的にHTTPSを有効化
-
-3. **APIキーの管理**
-   - Google Gemini APIキーの使用量を定期的に監視
-   - 必要に応じて使用制限を設定（無料枠：1分あたり15リクエスト、1日1500リクエスト）
-
-## その他のデプロイオプション
-
-### Azure App Service
+### 🐳 Dockerでデプロイ
 
 ```bash
-# requirements.txtを使用
-az webapp up --name your-app-name --runtime "PYTHON:3.9"
+# ビルド
+docker build -t ai-search-app .
+
+# 実行
+docker run -p 8501:8501 \
+  -e GOOGLE_API_KEY="your-api-key" \
+  ai-search-app
+
+# または Docker Compose
+docker-compose up -d
 ```
 
-### Google Cloud Run
+### 🔧 その他のデプロイオプション
+
+#### Heroku
 
 ```bash
-# Dockerfileを作成してデプロイ
-gcloud run deploy --source .
+heroku login
+heroku create your-app-name
+git push heroku main
 ```
 
-### AWS EC2 / Lightsail
+#### AWS EC2
 
 ```bash
 # EC2インスタンスでStreamlitを起動
 streamlit run main.py --server.port 8501 --server.address 0.0.0.0
 ```
+
+#### Google Cloud Run
+
+```bash
+gcloud run deploy --source .
+```
+
+### 🔒 セキュリティ機能
+
+アプリには以下のセキュリティ機能が実装されています：
+
+- ✅ パスワード認証
+- ✅ ログイン試行回数制限（6時間以内に3回まで）
+- ✅ セッションタイムアウト（デフォルト: 60分）
+- ✅ アクセスログ記録
+- ✅ XSRF保護
+- ✅ IPホワイトリスト（オプション）
 
 ## トラブルシューティング
 
